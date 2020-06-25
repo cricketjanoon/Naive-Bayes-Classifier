@@ -5,7 +5,6 @@ Created on Sat Jun 20 16:06:33 2020
 @author: cricketjanoon
 """
 
-
 import pandas as pd
 import string
 import re
@@ -95,3 +94,18 @@ prior_prob = {}
 prior_prob['positive'] = counts['positive'] / cleaned_tweets['airline_sentiment'].count()
 prior_prob['negative'] = counts['negative'] / cleaned_tweets['airline_sentiment'].count()
 prior_prob['neutral'] = counts['neutral'] / cleaned_tweets['airline_sentiment'].count()
+
+
+# Stratified splitting of data into training and test data (80:20)
+sentiments = ['positive', 'negative', 'neutral']
+
+train_data= pd.DataFrame({'airline_sentiment':'', 'text':''}, index=[])
+test_data = pd.DataFrame({'airline_sentiment':'', 'text':''}, index=[])
+
+for sentiment in sentiments:
+    cur_tweets = cleaned_tweets[cleaned_tweets['airline_sentiment'] == sentiment]
+    cur_train_data = cur_tweets.iloc[0:int(cur_tweets.shape[0]*0.8)]
+    cur_test_data = cur_tweets.iloc[int(cur_tweets.shape[0]*0.8):cur_tweets.shape[0]]
+    train_data = pd.concat([train_data, cur_train_data])
+    test_data = pd.concat([test_data, cur_test_data])
+    
