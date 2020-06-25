@@ -84,3 +84,12 @@ def preprocess_tweets(df_tweets):
 # df_tweets.to_csv("cleaned_tweets.csv", index=False)
 
 cleaned_tweets = pd.read_csv("cleaned_tweets.csv")
+
+# extract unique vocabolary words
+vocab = []
+for index, row in cleaned_tweets.iterrows():
+    vocab += [x for x in row['text'].split() if x not in vocab]
+    
+
+    
+    
