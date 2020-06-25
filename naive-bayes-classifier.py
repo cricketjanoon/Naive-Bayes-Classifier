@@ -24,7 +24,6 @@ def deEmojify(text):
                            "]+", flags = re.UNICODE)
     return regrex_pattern.sub(r'',text)
 
-#remove links, @username, RT 
 def clean_links_usernames(text):
     '''
     Removes http links and twitter usernames like @cricketjanoon
@@ -58,7 +57,6 @@ def remove_flight_numbers(text):
     """
     return ' '.join(word for word in text.split() if not any(char.isdigit() for char in word))
 
-
 def count(text):
     """
     Returns the length of string.
@@ -91,5 +89,9 @@ for index, row in cleaned_tweets.iterrows():
     vocab += [x for x in row['text'].split() if x not in vocab]
     
 
-    
-    
+# calculating the prior probability
+counts = cleaned_tweets['airline_sentiment'].value_counts()
+prior_prob = {} 
+prior_prob['positive'] = counts['positive'] / cleaned_tweets['airline_sentiment'].count()
+prior_prob['negative'] = counts['negative'] / cleaned_tweets['airline_sentiment'].count()
+prior_prob['neutral'] = counts['neutral'] / cleaned_tweets['airline_sentiment'].count()
