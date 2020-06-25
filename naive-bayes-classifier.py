@@ -77,6 +77,10 @@ def preprocess_tweets(df_tweets):
     df_tweets['text'] = df_tweets['text'].apply(remove_single_char)
     df_tweets = df_tweets[df_tweets['text'].apply(count) != 0]
     return df_tweets
-df_tweets = pd.read_csv("Tweets.csv")
-df_tweets = preprocess_tweets(df_tweets)
 
+
+# df_tweets = pd.read_csv("Tweets.csv")
+# df_tweets = preprocess_tweets(df_tweets)
+# df_tweets.to_csv("cleaned_tweets.csv", index=False)
+
+cleaned_tweets = pd.read_csv("cleaned_tweets.csv")
