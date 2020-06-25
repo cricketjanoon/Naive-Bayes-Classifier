@@ -58,7 +58,14 @@ def remove_flight_numbers(text):
     """
     return ' '.join(word for word in text.split() if not any(char.isdigit() for char in word))
 
-def preprocess_tweets(tweets):
+
+def count(text):
+    """
+    Returns the length of string.
+    """
+    return len(text)
+
+def preprocess_tweets(df_tweets):
     df_tweets['text'] = df_tweets['text'].apply(deEmojify)
     df_tweets['text'] = df_tweets['text'].apply(clean_links_usernames)
     df_tweets['text'] = df_tweets['text'].apply(lambda x: re.sub('  ', '', x))  
@@ -68,8 +75,8 @@ def preprocess_tweets(tweets):
     df_tweets['text'] = df_tweets['text'].apply(remove_stopwords)
     df_tweets['text'] = df_tweets['text'].apply(remove_flight_numbers)
     df_tweets['text'] = df_tweets['text'].apply(remove_single_char)
-
-    
+    df_tweets = df_tweets[df_tweets['text'].apply(count) != 0]
+    return df_tweets
 df_tweets = pd.read_csv("Tweets.csv")
-preprocess_tweets(df_tweets)
+df_tweets = preprocess_tweets(df_tweets)
 
