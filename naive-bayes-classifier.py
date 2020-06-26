@@ -5,6 +5,9 @@ Created on Sat Jun 20 16:06:33 2020
 @author: cricketjanoon
 """
 
+from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix, precision_score, accuracy_score, f1_score, recall_score
+# sklearn metrics used only to compare results
+
 import pandas as pd
 import numpy as np
 import string
@@ -170,9 +173,35 @@ for i, test_tweet in test_data.iterrows():
     index +=1
  
     
-# Calculating confusion matrix    
-confusion_matrix = np.zeros((3,3)) # because there are three classes
+# Calculating confusion matrix and evaluation metrics: accuracy, precision, recall, f1-score   
+print('-'*5, "My own calculated Metrics and Confusion Matrix", '-'*5) 
+confusion_matrix = np.zeros((3,3), dtype=np.int32) # because there are three classes
 for i in range(test_data.shape[0]):
-    # print(test_labels[i], predicted_labels[i])
     confusion_matrix[test_labels[i][0]][predicted_labels[i][0]] += 1
+print(confusion_matrix)
     
+true_positive = np.sum(confusion_matrix.diagonal())
+recall = np.diag(confusion_matrix) / np.sum(confusion_matrix, axis=1)
+precision = np.diag(confusion_matrix) / np.sum(confusion_matrix, axis=0)
+accuracy = true_positive / test_data.shape[0]
+f1 = (2*np.mean(precision)*np.mean(recall)) / (np.mean(recall) + np.mean(precision))
+
+print("Accuracy:", accuracy)
+print("Precision:", np.mean(precision))
+print("Recall:", np.mean(recall))
+print("F1-Score:", f1)
+
+print('-'*10, "SkLearn Metrics and Confusion Matrix", '-'*10)
+
+sk_confustion_matrix = sklearn_confusion_matrix(test_labels, predicted_labels)
+print(sk_confustion_matrix)
+
+sk_accuracy = accuracy_score(test_labels, predicted_labels)
+sk_precision = precision_score(test_labels, predicted_labels, average='macro')
+sk_recall = recall_score(test_labels, predicted_labels, average='macro')
+sk_f1 = f1_score(test_labels, predicted_labels, average='macro')
+
+print('Accuracy:', sk_accuracy)
+print('Precision:', sk_precision)
+print('Recall:', sk_recall)
+print('F1 score:', sk_f1)
