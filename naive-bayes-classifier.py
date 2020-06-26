@@ -76,6 +76,7 @@ def preprocess_tweets(df_tweets):
     return df_tweets
 
 
+# un-comment this for running the first time
 # df_tweets = pd.read_csv("Tweets.csv")
 # df_tweets = preprocess_tweets(df_tweets)
 # df_tweets.to_csv("cleaned_tweets.csv", index=False)
@@ -97,6 +98,7 @@ prior_prob['neutral'] = counts['neutral'] / cleaned_tweets['airline_sentiment'].
 
 
 # Stratified splitting of data into training and test data (80:20)
+sentiment_wise_tweets = {}
 sentiments = ['positive', 'negative', 'neutral']
 
 train_data= pd.DataFrame({'airline_sentiment':'', 'text':''}, index=[])
@@ -104,8 +106,46 @@ test_data = pd.DataFrame({'airline_sentiment':'', 'text':''}, index=[])
 
 for sentiment in sentiments:
     cur_tweets = cleaned_tweets[cleaned_tweets['airline_sentiment'] == sentiment]
+    sentiment_wise_tweets[sentiment] = cur_tweets
     cur_train_data = cur_tweets.iloc[0:int(cur_tweets.shape[0]*0.8)]
     cur_test_data = cur_tweets.iloc[int(cur_tweets.shape[0]*0.8):cur_tweets.shape[0]]
     train_data = pd.concat([train_data, cur_train_data])
     test_data = pd.concat([test_data, cur_test_data])
+    
+
+# extracting sentiment wise vocabolary
+sentiment_vocab = {'positive':[], 'negative':[], 'neutral':[]}
+for sentiment in sentiments:
+    for index, row in sentiment_wise_tweets[sentiment].iterrows():
+        sentiment_vocab[sentiment] += [x for x in row['text'].split() if x not in sentiment_vocab[sentiment]]
+      
+# preparing sentiment-wise word count dictionary
+sentiment_vocab_word_count = {'positive':[], 'negative':[], 'neutral':[]}
+for sentiment in sentiments:
+    sentiment_vocab_word_count[sentiment] = {word:1 for word in vocab} # one for normalizing
+    
+# counting appearance of each word in each class
+for index, tweet in train_data.iterrows():
+    for word in tweet['text'].split():
+        sentiment_vocab_word_count[tweet['airline_sentiment']][word] +=1
+    
+# total words appeared in each class (including the one we added for normalizing)
+total_words_count = {'positive':0, 'negative':0, 'neutral':0}
+for sentiment in sentiments:
+    for key, value in sentiment_vocab_word_count[sentiment].items():
+        total_words_count[sentiment] += value
+
+#calculating P(word|class) for all three classes
+for sentiment in sentiments:
+    normalizing_factor = total_words_count[sentiment]
+    sentiment_vocab_word_count[sentiment] = {key:value/(normalizing_factor) for key, value in sentiment_vocab_word_count[sentiment].items()}
+    
+# code to check whether probability for all vocab in each class sums to 1
+for sentiment in sentiments:
+    prob = 0.0
+    for key, value in sentiment_vocab_word_count[sentiment].items():
+        prob += value
+    print("Probability for {}: {}".format(sentiment, prob), '\n')
+
+
     
