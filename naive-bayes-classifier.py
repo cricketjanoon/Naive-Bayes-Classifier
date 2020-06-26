@@ -6,7 +6,9 @@ Created on Sat Jun 20 16:06:33 2020
 """
 
 import pandas as pd
+import numpy as np
 import string
+import math
 import re
 
 
@@ -141,11 +143,36 @@ for sentiment in sentiments:
     sentiment_vocab_word_count[sentiment] = {key:value/(normalizing_factor) for key, value in sentiment_vocab_word_count[sentiment].items()}
     
 # code to check whether probability for all vocab in each class sums to 1
-for sentiment in sentiments:
-    prob = 0.0
-    for key, value in sentiment_vocab_word_count[sentiment].items():
-        prob += value
-    print("Probability for {}: {}".format(sentiment, prob), '\n')
+# for sentiment in sentiments:
+#     prob = 0.0
+#     for key, value in sentiment_vocab_word_count[sentiment].items():
+#         prob += value
+#     print("Probability for {}: {}".format(sentiment, prob), '\n')
 
 
+# testing phase  
+label_dict = {'positive': 0, 'negative': 1, 'neutral': 2}    
+test_labels = np.zeros((test_data.shape[0], 1), dtype=np.int32)
+predicted_labels = np.zeros((test_data.shape[0], 1), dtype=np.int32)
+
+for index, label in enumerate(test_data['airline_sentiment'].to_numpy()):
+    test_labels[index] = label_dict[label]
+
+index = 0
+for i, test_tweet in test_data.iterrows():
+    prob_sent = {'positive': 0.0, 'negative': 0.0, 'neutral': 0.0}   
+    for sentiment in sentiments:
+        prob_sent[sentiment] = math.log(prior_prob[sentiment])
+        for word in test_tweet['text'].split():
+            prob_sent[sentiment] += math.log(sentiment_vocab_word_count[sentiment][word])
+    max_key = max(prob_sent, key=lambda k: prob_sent[k])
+    predicted_labels[index] = label_dict[max_key]
+    index +=1
+ 
+    
+# Calculating confusion matrix    
+confusion_matrix = np.zeros((3,3)) # because there are three classes
+for i in range(test_data.shape[0]):
+    # print(test_labels[i], predicted_labels[i])
+    confusion_matrix[test_labels[i][0]][predicted_labels[i][0]] += 1
     
